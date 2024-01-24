@@ -13,7 +13,7 @@ Description: Header file of the nanopb communication protocol
 #include <pb.h>
 #include <pb_encode.h>
 #include <pb_decode.h>
-#include "StatusMessage.h"
+#include <Arduino.h>
 
 #define MAX_MSG_LEN                         200
 #define MAX_NBS_MSG                         6
@@ -27,10 +27,10 @@ struct Topic {
 enum TOPICS
 { 
   // OUT
-  DEBUG_MOT,
+  SENSORS,
 
   // IN
-  LIGHT,
+  CMD,
 
   _NBS_TOPICS
 };

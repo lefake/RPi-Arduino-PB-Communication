@@ -84,8 +84,6 @@ void PBUtils::pbSend(int nbs, ...)
         toSendBuilder += String(toSend);
       }
     }
-    else
-      sendStatus(ERROR, ENCODING_PB);
     
     toSendBuilder += ";";
   }
@@ -94,8 +92,6 @@ void PBUtils::pbSend(int nbs, ...)
 
   if (success)
     Serial.print(toSendBuilder);
-  else
-    sendStatus(ERROR, ENCODING_PB);
 }
 
 /*

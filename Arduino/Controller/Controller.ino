@@ -4,77 +4,30 @@
 #include <pb_encode.h>
 #include <pb_decode.h>
 #include "floatarray.pb.h"
-#include "int32.pb.h"
+// #include "int32.pb.h"
 
-#include "Configuration.h"
-#include "Constants.h"
-#include "StatusMessage.h"
 #include "PBUtils.h"
-#include "Pins.h"
 
 // ======================================== CONDITIONNAL INCLUDES ========================================
-
-#ifdef HAS_LIGHTTOWER
-#include "LightTower.h"
-#endif
-
-// ======================================== FUNCTIONS ========================================
-void propCallback();
-void chuteCallback();
-void soufflanteCmdCallback();
-void deadmanCallback();
-void estopCallback();
-void lightCallback();
-void pidCstCallback();
-
-void loopSonars();
-void loopSafety();
-void loopController();
 
 // ======================================== VARIABLES ========================================
 
 // ==================== TIMERS ====================
 long lastTime = 0;
-long delayInterval = 100;
-
-long lastTimeSonar = 0;
-long delayIntervalSonar = 1500;
-
-long lastTimeImu = 0;
-long delayIntervalImu = 10;
-
-long lastTimeGps = 0;
-long delayIntervalGps = 200;
-
-long lastDebounceTime = 0;
-long delayDebounceInterval = 50;
+long delayInterval = 500;
 
 // ==================== TOPICS ====================
 // Out
-FloatArray debugArduinoMsg = FloatArray_init_zero;
-FloatArray encMsg = FloatArray_init_zero;
-FloatArray imuMsg = FloatArray_init_zero;
-FloatArray gpsMsg = FloatArray_init_zero;
-FloatArray sonarPairsMsg = FloatArray_init_zero;
-Int32 soufflanteHeightMsg = Int32_init_zero;
-Int32 estopStateMsg = Int32_init_zero;
-FloatArray debugMotMsg = FloatArray_init_zero;
+FloatArray sensorsMsg = FloatArray_init_zero;
 
 // In
-FloatArray propMsg = FloatArray_init_zero;
-FloatArray chuteMsg = FloatArray_init_zero;
-Int32 soufflanteCmdMsg = Int32_init_zero;
-Int32 deadmanMsg = Int32_init_zero;
-Int32 estopMsg = Int32_init_zero;
-FloatArray lightMsg = FloatArray_init_zero;
-FloatArray pidCstMsg = FloatArray_init_zero;
+FloatArray cmdMsg = FloatArray_init_zero;
 
 const Topic topics[] = {
       // Out
-      {DEBUG_MOT, FloatArray_fields, &debugMotMsg},
-
+      {SENSORS, FloatArray_fields, &sensorsMsg},
       // In
-      {LIGHT, FloatArray_fields, &lightMsg},
+      {CMD, FloatArray_fields, &cmdMsg},
     };
 
 // ==================== SERIAL COMMUNICATION ====================
@@ -99,28 +52,17 @@ bool deadmanActive = false;
 
 // ==================== DEVICES ====================
 
-#ifdef HAS_LIGHTTOWER
-LightTower lightTower;
-#endif
-
 float test_data = 0.0;
 
 // ======================================== MAIN ========================================
 void setup()
 {
   Serial.begin(115200);
-
-
-// ==== Controller ====
-    #ifdef HAS_LIGHTTOWER
-    lightTower.init(lightPins);
-    #endif
-  
+  delay(10);
 }
 
 void loop()
 {
-
   if (inCmdComplete)
   {
     inCmdComplete = false;
@@ -132,13 +74,11 @@ void loop()
       {
         switch (newMsgsIds[i])
         {
-          case LIGHT:
-            lightCallback();
-            testCallback();
+          case CMD:
+            cmdCallback();
             break;
             
           default:
-            sendStatusWithMessage(WARNING, OTHER, "Unsupported topic:" + String(newMsgsIds[i]));
             break;
         }
       }
@@ -147,26 +87,27 @@ void loop()
     inCmdType = -1;
   }
   delay(10);
+
+  if(millis() - lastTime > delayInterval){
+    sensorsCallback();
+    lastTime = millis();
+  }
 }
+
+// ======================================== FUNCTIONS ========================================
 
 // ======================================== CALLBACKS ========================================
 
-void lightCallback()
+void cmdCallback()
 {
-#ifdef HAS_LIGHTTOWER
-  test_data = lightMsg.data[0];
-#endif
+  test_data = cmdMsg.data[0];
 }
 
-void testCallback()
+void sensorsCallback()
 {
-  debugMotMsg.data_count = 5;
-  debugMotMsg.data[0] = test_data;
-  debugMotMsg.data[1] = 1.0;   // Vitesse
-  debugMotMsg.data[2] = 1.2;
-  debugMotMsg.data[3] = 3.2;
-  debugMotMsg.data[4] = 4.3;
-  pbUtils.pbSend(1, DEBUG_MOT);
+  sensorsMsg.data_count = 1;
+  sensorsMsg.data[0] = test_data;
+  pbUtils.pbSend(1, SENSORS);
 }
 
 
