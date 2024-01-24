@@ -46,8 +46,8 @@ class ArduinoCommunicationNode(Node):
         self.subscription = self.create_subscription(String, 'chatter', self.chatter_callback, 10)
 
         self.msg_obj = {
-            7: floatarray_pb2.FloatArray(),
-            13: floatarray_pb2.FloatArray(),
+            0: floatarray_pb2.FloatArray(),
+            1: floatarray_pb2.FloatArray(),
             # Add more message objects if needed, replace '1' with the corresponding message ID
         }
 
@@ -55,14 +55,15 @@ class ArduinoCommunicationNode(Node):
         self.pb_serial_handler = PBSerialHandler(self.ser, self.callback_function, self.msg_obj)
 
         # Create a timer to periodically send messages
-        self.timer = self.create_timer(2.0, self.send_pb_message)
+        # self.timer = self.create_timer(2.0, self.send_pb_message)
 
     def callback_function(self, response):
         if response is not None:
             self.get_logger().info(f"Received: {response}")
             deserialized_msgs = self.pb_serial_handler._serialization_handler.deserialize(response)
+            self.get_logger().info(f"Received: {deserialized_msgs}")
             for msg_id, msg_obj in deserialized_msgs:
-                if msg_id == 7:  # Replace '1' with the corresponding message ID
+                if msg_id == 0:  # Replace '1' with the corresponding message ID
                     self.get_logger().info(f"Received message ID {msg_id}: {msg_obj}")
                     # Convert FloatArray to Float32MultiArray
                     ros2_msg = Float32MultiArray()
@@ -87,7 +88,7 @@ class ArduinoCommunicationNode(Node):
             float_array_msg.data.append(number)
 
             # Replace '7' with the corresponding message ID
-            self.pb_serial_handler.write_pb_msg(13, float_array_msg)
+            self.pb_serial_handler.write_pb_msg(1, float_array_msg)
 
     def send_pb_message(self):
         # Example: Write a protobuf message
@@ -95,7 +96,7 @@ class ArduinoCommunicationNode(Node):
         # Populate your protobuf message fields here
 
         # Replace '1' with the corresponding message ID
-        self.pb_serial_handler.write_pb_msg(1, msg_to_send)
+        self.pb_serial_handler.write_pb_msg(13, msg_to_send)
 
     def shutdown_node(self):
         # Close the serial connection when the node is shut down
@@ -112,7 +113,7 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     finally:
-        node.shutdown_node()
+        node.ser.close()
         rclpy.shutdown()
 
 

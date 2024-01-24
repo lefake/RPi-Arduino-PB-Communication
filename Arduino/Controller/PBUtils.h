@@ -27,23 +27,10 @@ struct Topic {
 enum TOPICS
 { 
   // OUT
-  DEBUG_ARDUINO = 0,
-  ENC,
-  IMU,
-  GPS,
-  SONAR_PAIRS,
-  SOUFFLANTE_HEIGHT,
-  ESTOP_STATE,
   DEBUG_MOT,
 
   // IN
-  PROP,
-  CHUTE,
-  SOUFFLANTE_CMD,
-  DEADMAN,
-  ESTOP,
   LIGHT,
-  PID_CST,
 
   _NBS_TOPICS
 };

@@ -71,21 +71,9 @@ FloatArray pidCstMsg = FloatArray_init_zero;
 
 const Topic topics[] = {
       // Out
-      {DEBUG_ARDUINO, FloatArray_fields, &debugArduinoMsg},
-      {ENC, FloatArray_fields, &encMsg},
-      {IMU, FloatArray_fields, &imuMsg},
-      {GPS, FloatArray_fields, &gpsMsg},
-      {SONAR_PAIRS, FloatArray_fields, &sonarPairsMsg},
-      {SOUFFLANTE_HEIGHT, Int32_fields, &soufflanteHeightMsg},      
-      {ESTOP_STATE, Int32_fields, &estopStateMsg},
       {DEBUG_MOT, FloatArray_fields, &debugMotMsg},
 
       // In
-      {PROP, FloatArray_fields, &propMsg},
-      {CHUTE, FloatArray_fields, &chuteMsg},
-      {SOUFFLANTE_CMD, Int32_fields, &soufflanteCmdMsg},
-      {DEADMAN, Int32_fields, &deadmanMsg},
-      {ESTOP, Int32_fields, &estopMsg},
       {LIGHT, FloatArray_fields, &lightMsg},
     };
 
